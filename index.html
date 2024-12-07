@@ -4,26 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Nations</title>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-    <header>
-        <h1>Golden Nations</h1>
-        <p>Your gateway to exclusive products!</p>
-    </header>
+    <h1>Golden Nations Sales</h1>
+    <button id="payButton">Pay $50</button>
 
-    <section class="products">
-        <h2>Our Products</h2>
-        <div class="product">
-            <h3>Golden Bracelet</h3>
-            <p>$50</p>
-            <button id="checkout-button">Buy Now</button>
-        </div>
-    </section>
+    <script>
+        const stripe = Stripe('pk_test_51Q6zA3BeNARuJqY8iKZE0eklx8Nb1aIV7ihDMsZf6s2M1MMMGLlcfBsrmk8bTvIKRLM70HBCVKwUf6kJpaj58eCz00S3t58ZKj'); // 替换为您的 Stripe 发布密钥
 
-    <footer>
-        <p>&copy; 2024 Golden Nations</p>
-    </footer>
-    <script src="app.js"></script>
+        document.getElementById('payButton').addEventListener('click', async () => {
+            const response = await fetch('/create-payment-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const { clientSecret } = await response.json();
+
+            const result = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: cardElement, // 在实际使用时，您需要在页面上嵌入 Stripe 的卡片输入组件
+                    billing_details: { name: 'Customer' },
+                }
+            });
+
+            if (result.error) {
+                console.error(result.error.message);
+            } else {
+                alert('Payment succeeded!');
+            }
+        });
+    </script>
 </body>
 </html>
