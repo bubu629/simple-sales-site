@@ -10,15 +10,15 @@ const port = 4242;
 app.use(express.static('public'));
 app.use(express.json());
 
-// Route to display the checkout page
+// Home route
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-// Stripe payment route
+// Route to create a payment intent with Stripe
 app.post('/create-payment-intent', async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
-        amount: 2000, // amount in cents, e.g., $20.00
+        amount: 2000, // Amount in cents (e.g., $20)
         currency: 'usd',
         payment_method_types: ['card'],
     });
