@@ -3,36 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Nations Sales</title>
-    <script src="https://js.stripe.com/v3/"></script>
+    <title>Goldennations Sales</title>
 </head>
 <body>
-    <h1>Golden Nations Sales</h1>
-    <button id="payButton">Pay $50</button>
+    <h1>Goldennations Sales</h1>
+    <button id="payButton">Pay $20</button>
 
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
-        const stripe = Stripe('pk_test_51Q6zA3BeNARuJqY8iKZE0eklx8Nb1aIV7ihDMsZf6s2M1MMMGLlcfBsrmk8bTvIKRLM70HBCVKwUf6kJpaj58eCz00S3t58ZKj'); // 使用测试公钥
+        var stripe = Stripe('pk_test_51Q6zA3BeNARuJqY8iKZE0eklx8Nb1aIV7ihDMsZf6s2M1MMMGLlcfBsrmk8bTvIKRLM70HBCVKwUf6kJpaj58eCz00S3t58ZKj');
+        var payButton = document.getElementById('payButton');
 
-        document.getElementById('payButton').addEventListener('click', async () => {
-            const response = await fetch('/create-payment-intent', {
+        payButton.addEventListener('click', function() {
+            fetch('/create-payment-intent', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-            });
-            const { clientSecret } = await response.json();
-
-            // Stripe 确认支付
-            const result = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: {
-                    card: cardElement, // 此处应通过 Stripe Elements 创建一个卡片输入组件
-                    billing_details: { name: 'Customer' },
+                headers: {
+                    'Content-Type': 'application/json'
                 }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(paymentData) {
+                stripe.redirectToCheckout({
+                    sessionId: paymentData.clientSecret
+                }).then(function(result) {
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                });
             });
-
-            if (result.error) {
-                console.error(result.error.message);
-            } else {
-                alert('Payment succeeded!');
-            }
         });
     </script>
 </body>

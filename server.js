@@ -1,31 +1,33 @@
 const express = require('express');
-const stripe = require('stripe')('sk_test_51Q6zA3BeNARuJqY8ilSZRDKxfDzwcXDB700Ku37jU1yISApaBiHXVv0QSHSHSYb90yOh3LWz2OLHBTiLHRBLio6Y00Y5V27Rtl'); // 使用测试私钥
-const app = express();
+const stripe = require('stripe')('sk_test_51Q6zA3BeNARuJqY8ilSZRDKxfDzwcXDB700Ku37jU1yISApaBiHXVv0QSHSHSYb90yOh3LWz2OLHBTiLHRBLio6Y00Y5V27Rtl');
+const dotenv = require('dotenv');
+dotenv.config();
 
-// 解析请求体中的 JSON 数据
+const app = express();
+const port = 4242;
+
+// Middleware
+app.use(express.static('public'));
 app.use(express.json());
 
-// 首页路由
+// Route to display the checkout page
 app.get('/', (req, res) => {
-    res.send('Welcome to Golden Nations Sales!');
+    res.sendFile(__dirname + '/index.html');
 });
 
-// 创建支付意图路由
+// Stripe payment route
 app.post('/create-payment-intent', async (req, res) => {
-    try {
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: 5000, // 价格单位：分，5.00 USD
-            currency: 'usd',
-        });
-        res.send({
-            clientSecret: paymentIntent.client_secret,
-        });
-    } catch (error) {
-        res.status(500).send({ error: error.message });
-    }
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: 2000, // amount in cents, e.g., $20.00
+        currency: 'usd',
+        payment_method_types: ['card'],
+    });
+
+    res.send({
+        clientSecret: paymentIntent.client_secret
+    });
 });
 
-// 启动服务器
-app.listen(4242, () => {
-    console.log('Server running on http://localhost:4242');
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
 });
